@@ -193,6 +193,33 @@ Les résultats doivent ensuite être recoupés avec les **connecteurs physiques 
 
 **Statut :** premier relevé reçu, mais non exploitable pour identifier les ports physiques ; nouvel inventaire AHV attendu.
 
+### Deuxième relevé : sortie vide sur une machine présentée comme hôte Nutanix
+
+Un nouveau relevé a été fourni sur une console système annoncée comme une **machine Nutanix** :
+
+```bash
+lspci -nn | grep -Ei 'Ethernet|Network'
+# Aucune ligne affichée.
+```
+
+**Ce qui est constaté :** la recherche n'a trouvé aucune ligne correspondante dans la sortie de `lspci`. Cela **ne démontre pas** l'absence de carte réseau physique. Le rôle exact du système (hôte AHV, autre hyperviseur, environnement restreint) et le contenu complet de `lspci` n'ont pas été confirmés.
+
+Pour départager les hypothèses, demander la sortie **sans détails sensibles** de :
+
+```bash
+cat /etc/os-release
+lspci -nn | head -30
+ip -br link
+
+for nic in /sys/class/net/*; do
+  name=$(basename "$nic")
+  echo "=== $name ==="
+  ethtool -i "$name" 2>/dev/null | grep -E 'driver:|bus-info:'
+done
+```
+
+**Action NetBox :** ne pas ajouter de ports supposés au Device Type `NX-8170A-G10` à partir de cette sortie vide ; les interfaces et connecteurs physiques restent à confirmer.
+
 ## 6. Procédure sûre de mise à jour NetBox
 
 1. Faire l'inventaire exact des modèles présents et des ports manquants (`dcim/device-types/` et `dcim/interface-templates/`).
@@ -214,7 +241,7 @@ Les résultats doivent ensuite être recoupés avec les **connecteurs physiques 
 | Simulation de 14 ports sur quatre modèles | Réussie ; création non démontrée |
 | Validation des interfaces pour tous les modèles | **À faire** |
 | Vérification des variantes NX-8150 | **À faire** |
-| Relevé des cartes réseau pour NX-8170A-G10-A9355-CM | CVM : 4 VirtIO virtuels détectés ; **relevé AHV physique demandé** |
+| Relevé des cartes réseau pour NX-8170A-G10-A9355-CM | CVM : 4 VirtIO virtuels ; second relevé : aucune ligne `lspci` correspondante ; **inventaire physique toujours attendu** |
 | Images avant/arrière Nutanix | **À faire** |
 
 ## Sources de référence
