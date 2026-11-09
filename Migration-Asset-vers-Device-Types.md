@@ -41,6 +41,30 @@ Transformer un export d'outil de gestion des actifs en **catalogue normalisé de
 - `A_CREER_MANUELLEMENT` : constructeur absent ou matériel spécifique.
 - `DOUBLON_NETBOX` : arbitrage nécessaire avant d'écrire.
 
+## Retour d'expérience : prises électriques liées à un Power Port
+
+Lors d'un lot supplémentaire de modèles issus de la bibliothèque communautaire, l'import des **Device Types**, images d'élévation et autres composants a réussi, mais certaines **Power Outlet Templates** ont été refusées avec :
+
+```text
+HTTP 400: Related objects must be referenced by numeric ID
+or by dictionary of attributes. Received an unrecognized value: Input
+```
+
+D'autres valeurs de lien observées étaient `AC-Input 1`, `AC-Input 2` et `PS1`.
+
+**Origine :** le champ YAML `power_port` donne un nom logique du port d'alimentation. Le champ API homonyme attend la référence de l'objet **Power Port Template** existant. L'importeur doit résoudre le nom en ID sur **le même Device Type**.
+
+**Réparation sûre** :
+1. Lire les YAML source et les `power-port-templates` / `power-outlet-templates` existants par API.
+2. Identifier les prises manquantes par couple **Device Type ID + Outlet Name**.
+3. Résoudre pour chaque prise son `power_port` par **Device Type ID + Power Port Name**.
+4. Lancer une simulation en affichant les liens résolus, puis créer exclusivement les prises manquantes.
+5. Vérifier le bilan final ; ne pas relancer tout l'import des modèles et ne pas écraser les composants existants.
+
+Une exécution du POC a signalé **24 prises manquantes**, alors que les modèles, les images et les autres composants avaient été importés. **Ces 24 prises restent à vérifier après réparation** : le diagnostic ne prouve pas que le correctif a été exécuté.
+
+Les ID numériques sont propres à chaque instance : **ne jamais les figer dans un YAML portable ni dans un script destiné à plusieurs installations**.
+
 ## Principes de confidentialité
 
 **Ne pas publier l'export Asset, les quantités d'actifs, les modèles réellement déployés, les IP, les identifiants de matériels ni les rapports internes** dans le dépôt de documentation publique. Conserver le manifeste d'import, les comparaisons et les journaux détaillés sur un support privé et contrôlé.
