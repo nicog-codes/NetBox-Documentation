@@ -170,6 +170,29 @@ Pour chaque port, conserver :
 
 **Respecter les règles de confidentialité :** ne pas publier dans ce dépôt public les adresses MAC internes, IP de management, noms d'hôtes, captures BMC ou numéros de série de l'infrastructure étudiée.
 
+### Premier retour terrain : commande exécutée sur une CVM, et non sur l'hôte AHV
+
+Un premier relevé `lspci -nn | grep -Ei 'Ethernet|Network'` a été fourni depuis une **Controller VM (CVM)**. La sortie indiquait **quatre contrôleurs réseau VirtIO** (`Red Hat, Inc. Virtio network device [1af4:1000]`, fonctions PCI `00:04.0` à `00:07.0`).
+
+**Conclusion :** ce résultat représente les **interfaces réseau virtuelles de la CVM**, et non les adaptateurs ni ports physiques du nœud Nutanix. **Aucune interface physique ne doit être créée dans le Device Type à partir de ces quatre entrées VirtIO.**
+
+**Action demandée :** relever les contrôleurs depuis la session SSH de l'**hôte hyperviseur AHV lui-même**, et non une CVM ou une autre VM. Exécuter en lecture seule :
+
+```bash
+lspci -nn | grep -Ei 'Ethernet|Network'
+ip -br link
+
+for nic in /sys/class/net/*; do
+  name=$(basename "$nic")
+  echo "=== $name ==="
+  ethtool -i "$name" 2>/dev/null | grep -E 'driver:|bus-info:'
+done
+```
+
+Les résultats doivent ensuite être recoupés avec les **connecteurs physiques réels** et la configuration des cartes AIOM/OCP/PCIe. Les informations sensibles de l'environnement (hôtes, IP, MAC, numéros de série, captures BMC) doivent rester hors du dépôt public.
+
+**Statut :** premier relevé reçu, mais non exploitable pour identifier les ports physiques ; nouvel inventaire AHV attendu.
+
 ## 6. Procédure sûre de mise à jour NetBox
 
 1. Faire l'inventaire exact des modèles présents et des ports manquants (`dcim/device-types/` et `dcim/interface-templates/`).
@@ -191,7 +214,7 @@ Pour chaque port, conserver :
 | Simulation de 14 ports sur quatre modèles | Réussie ; création non démontrée |
 | Validation des interfaces pour tous les modèles | **À faire** |
 | Vérification des variantes NX-8150 | **À faire** |
-| Relevé des cartes réseau pour NX-8170A-G10-A9355-CM | **En attente du retour de l'ingénieur** |
+| Relevé des cartes réseau pour NX-8170A-G10-A9355-CM | CVM : 4 VirtIO virtuels détectés ; **relevé AHV physique demandé** |
 | Images avant/arrière Nutanix | **À faire** |
 
 ## Sources de référence
