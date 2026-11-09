@@ -61,7 +61,7 @@ D'autres valeurs de lien observées étaient `AC-Input 1`, `AC-Input 2` et `PS1`
 4. Lancer une simulation en affichant les liens résolus, puis créer exclusivement les prises manquantes.
 5. Vérifier le bilan final ; ne pas relancer tout l'import des modèles et ne pas écraser les composants existants.
 
-Une exécution du POC a signalé **24 prises manquantes**, alors que les modèles, les images et les autres composants avaient été importés. **Ces 24 prises restent à vérifier après réparation** : le diagnostic ne prouve pas que le correctif a été exécuté.
+**Résultat confirmé du correctif ciblé :** `BILAN: 24 à corriger; 24 créés; 0 erreurs`. Le lot précédent avait créé **417 Device Types**, importé **212 images** et créé **8 967 composants**. Après le rattrapage des 24 prises, le total est de **8 991 composants créés** pour ce lot, sans échec restant signalé. Ces nombres décrivent des *définitions de modèles*, pas des équipements physiques inventoriés.
 
 Les ID numériques sont propres à chaque instance : **ne jamais les figer dans un YAML portable ni dans un script destiné à plusieurs installations**.
 
