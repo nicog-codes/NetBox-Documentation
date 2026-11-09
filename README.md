@@ -5,6 +5,8 @@ Documentation technique publique consacrée à l'inventaire matériel et à l'im
 ## Articles
 
 - [POC Migration2Netbox — Import HPE, Cisco et Nutanix](POC-Migration2Netbox.md) : architecture générique, résultats de l'import, images, diagnostic API et correction d'un problème de liaison des ports d'alimentation.
+- [Nutanix — modèles YAML et interfaces réseau](Nutanix-Device-Types-Interfaces.md) : simulations, différences de modèles, résultat VirtIO de la CVM et inventaire AHV à poursuivre.
+- [Intégrations à étudier — LDAP/AD et PDU](NetBox-Integrations-LDAP-PDU.md) : feuille de route d'authentification et de supervision électrique, non encore déployée.
 
 ## Confidentialité
 
