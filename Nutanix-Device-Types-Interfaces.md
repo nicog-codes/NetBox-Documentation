@@ -370,6 +370,8 @@ Le script vérifie le constructeur **Nutanix**, l'identité exacte du modèle, l
 
 **Statut :** sources identifiées et importeur de PNG préparé ; **aucune image Nutanix n'a encore été extraite ni importée dans l'instance**. Le traitement des archives Visio et la validation des images par modèle restent à faire.
 
+**Automatisation préparée :** le dossier [`scripts/nutanix_auto/`](scripts/nutanix_auto/README.md) contient un lanceur Docker unique qui télécharge les ZIP VisioCafe, tente la conversion, produit une galerie de contrôle et lance la comparaison NetBox en simulation. La commande `bash /tmp/nutanix-bootstrap.sh --apply` n'est à exécuter **qu'après examen visuel**. Les sources comportant EMF/WMF ou les correspondances ambiguës sont exclues : elles peuvent être converties en lot via RackLibrary puis traitées avec le même lanceur. **Le pipeline vient d'être publié et n'a pas encore été validé sur l'hôte Docker cible ; aucun import d'image n'a été constaté.**
+
 ## Sources de référence
 
 - [Bibliothèque communautaire de modèles NetBox](https://github.com/netbox-community/devicetype-library)
