@@ -151,6 +151,9 @@ def identify(title, models):
     ]
     if len(matching) != 1:
         return None
+    # Exclude option-only views that do not represent the entire server.
+    if re.search(r'(?<![A-Za-z])(?:aiom|pcie|gpu|nic|bezel|option)(?![A-Za-z])', title, re.I):
+        return None
     front = bool(re.search(r'(?<![A-Za-z])front(?![A-Za-z])', title, re.I))
     rear = bool(re.search(r'(?<![A-Za-z])(?:rear|back)(?![A-Za-z])', title, re.I))
     if front == rear:
@@ -187,7 +190,7 @@ def racklibrary_zip_candidates(folder, models, issues):
                 manifest = json.loads(z.read("manifest.json"))
                 for item in manifest.get("shapes", []):
                     view = item.get("view", "")
-                    title = item.get("name", "") + " " + view
+                    title = str(item.get("name") or "") + " " + str(view or "")
                     model_side = identify(title, models)
                     member = item.get("files", {}).get("png")
                     if not model_side or not member or member not in z.namelist():
