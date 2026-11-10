@@ -273,6 +273,29 @@ Une future correction API doit être idempotente : uniquement ajouter les `inter
 
 **Script préparé (non exécuté sur l'instance) :** [`scripts/fix_nutanix_8170a_interfaces.py`](scripts/fix_nutanix_8170a_interfaces.py). Il fait une simulation par défaut, traite seulement le Device Type `NX-8170A-G10`, ne modifie pas les interfaces déjà présentes et exige `--apply` pour créer les six interfaces. Ses paramètres API sont lus uniquement depuis l'environnement local ; la vérification TLS reste activée par défaut.
 
+### Diagnostic du lancement de script : certificat autosigné
+
+Lors de la **première simulation** du script ciblé `scripts/fix_nutanix_8170a_interfaces.py`, la requête HTTPS initiale a échoué :
+
+```text
+requests.exceptions.SSLError: CERTIFICATE_VERIFY_FAILED
+self-signed certificate
+```
+
+L'exception s'est produite au **premier GET** de `/api/dcim/device-types/` : **aucune interface n'a été créée ou modifiée par cet essai**.
+
+Le script a été conçu pour activer la vérification TLS par défaut, et prendre facultativement `NETBOX_CA_BUNDLE` (fichier CA monté dans le conteneur) ou `NETBOX_TLS_VERIFY=false`. En environnement de test **seulement**, l'exécution ponctuelle suivante permet de poursuivre le diagnostic :
+
+```bash
+docker compose run --rm \
+  -e NETBOX_TLS_VERIFY=false \
+  -v "$PWD/fix_nutanix_8170a_interfaces.py:/app/fix_nutanix_8170a_interfaces.py:ro" \
+  --entrypoint python \
+  netbox-library-import /app/fix_nutanix_8170a_interfaces.py
+```
+
+**Sécurité :** ce paramètre désactive la validation d'identité du serveur et expose aux attaques d'interception ; il ne doit pas devenir la configuration permanente. Installer de préférence un certificat de confiance avec **SAN correspondant au DNS ou à l'adresse IP réellement utilisée** et transmettre sa chaîne CA à l'importeur. **Aucun résultat de la seconde simulation n'est encore confirmé dans ce document.**
+
 ## 6. Procédure sûre de mise à jour NetBox
 
 1. Faire l'inventaire exact des modèles présents et des ports manquants (`dcim/device-types/` et `dcim/interface-templates/`).
