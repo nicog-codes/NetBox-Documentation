@@ -271,6 +271,8 @@ eth4 : Broadcom BCM57416 — Port: Twisted Pair — Speed: Unknown!
 
 Une future correction API doit être idempotente : uniquement ajouter les `interface-templates` absents (nom + modèle), signaler toute différence de type, simuler avant `--apply`, et ne modifier aucun autre modèle.
 
+**Script préparé (non exécuté sur l'instance) :** [`scripts/fix_nutanix_8170a_interfaces.py`](scripts/fix_nutanix_8170a_interfaces.py). Il fait une simulation par défaut, traite seulement le Device Type `NX-8170A-G10`, ne modifie pas les interfaces déjà présentes et exige `--apply` pour créer les six interfaces. Ses paramètres API sont lus uniquement depuis l'environnement local ; la vérification TLS reste activée par défaut.
+
 ## 6. Procédure sûre de mise à jour NetBox
 
 1. Faire l'inventaire exact des modèles présents et des ports manquants (`dcim/device-types/` et `dcim/interface-templates/`).
