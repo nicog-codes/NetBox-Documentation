@@ -220,6 +220,35 @@ done
 
 **Action NetBox :** ne pas ajouter de ports supposés au Device Type `NX-8170A-G10` à partir de cette sortie vide ; les interfaces et connecteurs physiques restent à confirmer.
 
+### Troisième relevé : hôte AHV physique confirmé (inventaire PCI et pilotes)
+
+Un relevé complémentaire a confirmé le système **Nutanix AHV 11.2**, sur une plateforme AMD Turin. Les interfaces de l'hyperviseur ont été corrélées aux fonctions PCI et aux pilotes Linux, **sans publier les identifiants de l'hôte, les adresses MAC ou les informations de topologie**.
+
+| Interface AHV | Bus PCI | Famille de contrôleur | Pilote | Information de port |
+| --- | --- | --- | --- | --- |
+| `eth0` | `01:00.0` | Intel X710 for 10GBASE-T | `i40e` | Ethernet 10GBASE-T, à confirmer physiquement |
+| `eth2` | `01:00.1` | Intel X710 | `i40e` | Ethernet 10GBASE-T, à confirmer physiquement |
+| `eth3` | `01:00.2` | Intel X710 | `i40e` | Ethernet 10GBASE-T, à confirmer physiquement |
+| `eth5` | `01:00.3` | Intel X710 | `i40e` | Ethernet 10GBASE-T, à confirmer physiquement |
+| `eth1` | `12:00.0` | Broadcom, référence non identifiée | `bnxt_en` | Vitesse/connecteur non déterminés |
+| `eth4` | `12:00.1` | Broadcom, référence non identifiée | `bnxt_en` | Vitesse/connecteur non déterminés |
+
+Le contrôleur Intel `X710 for 10GBASE-T [8086:15ff]` est directement visible dans `lspci` pour `01:00.0` ; les trois autres fonctions `01:00.x` partagent le pilote `i40e`. **La présence de six interfaces Ethernet PCI est attestée**, mais la correspondance exacte avec les connecteurs externes et la nature des deux interfaces Broadcom restent à vérifier.
+
+L'interface `bmc` utilise le pilote **`rndis_host` sur un bus USB** : il s'agit d'une interface hôte-vers-BMC ; elle ne prouve pas la présence, la vitesse ou le nombre de ports IPMI/BMC physiques accessibles à l'arrière du serveur. Les interfaces `br*`, `tap*`, `vnet*`, `ovs-system` et `vxlan*` sont des interfaces logicielles et **ne doivent pas être importées comme ports physiques de Device Type**.
+
+**Prochain contrôle en lecture seule sur l'hôte AHV :**
+
+```bash
+lspci -nn -s 12:00.0
+lspci -nn -s 12:00.1
+lspci -nn -s 01:00.0
+ethtool eth1 | grep -Ei 'Supported link modes|Speed:|Port:|Supported ports|Link detected'
+ethtool eth4 | grep -Ei 'Supported link modes|Speed:|Port:|Supported ports|Link detected'
+```
+
+Les informations détaillées des ports Broadcom, cartes installées et prises externes devront être confirmées avec la documentation OEM ou la configuration matérielle. **Ne pas généraliser la configuration constatée à tous les exemplaires du même modèle si des options AIOM/OCP/PCIe sont possibles.**
+
 ## 6. Procédure sûre de mise à jour NetBox
 
 1. Faire l'inventaire exact des modèles présents et des ports manquants (`dcim/device-types/` et `dcim/interface-templates/`).
@@ -241,7 +270,7 @@ done
 | Simulation de 14 ports sur quatre modèles | Réussie ; création non démontrée |
 | Validation des interfaces pour tous les modèles | **À faire** |
 | Vérification des variantes NX-8150 | **À faire** |
-| Relevé des cartes réseau pour NX-8170A-G10-A9355-CM | CVM : 4 VirtIO virtuels ; second relevé : aucune ligne `lspci` correspondante ; **inventaire physique toujours attendu** |
+| Relevé des cartes réseau pour NX-8170A-G10-A9355-CM | **Hôte AHV 11.2 confirmé** : 4 Intel X710 (i40e) + 2 Broadcom (bnxt_en) ; type/connecteurs Broadcom à vérifier |
 | Images avant/arrière Nutanix | **À faire** |
 
 ## Sources de référence
