@@ -10,6 +10,8 @@ Documentation technique publique consacrée à l'inventaire matériel et à l'im
 
 - [Migration Asset vers Device Types](Migration-Asset-vers-Device-Types.md) : méthode générique de tri et de rapprochement d'un inventaire matériel, sans données sensibles.
 
+- [Nutanix — images de baie automatisées](scripts/nutanix_auto/README.md) : téléchargement des pochoirs, conversion en PNG, galerie de contrôle et import NetBox après validation.
+
 ## Confidentialité
 
 Le contenu est volontairement anonymisé : aucune adresse IP privée, aucun nom d'hôte personnel, aucun token API, mot de passe, empreinte de certificat ou détail de topologie interne n'est publié.
