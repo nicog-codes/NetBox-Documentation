@@ -334,6 +334,42 @@ Le lancement corrigé reste en **simulation par défaut**. La vérification TLS 
 | Relevé des cartes réseau pour NX-8170A-G10-A9355-CM | **Six interfaces confirmées** : 4 Intel X710 10GBASE-T + 2 Broadcom BCM57416 cuivre 10G ; import NetBox à faire |
 | Images avant/arrière Nutanix | **À faire** |
 
+## 8. Vues d'élévation avant/arrière Nutanix — sourcing
+
+**Objectif :** ajouter des images réelles du modèle aux champs `front_image` et `rear_image` des Device Types, afin de les afficher dans les vues de baie de NetBox. **Ne pas confondre ces images avec les pièces jointes génériques (`Image Attachments`)** : seules les images d'élévation associées directement au Device Type jouent ce rôle.
+
+### Sources trouvées
+
+La collection de [pochoirs Visio Nutanix de VisioCafe](https://www.visiocafe.com/nutanix.htm) est annoncée comme **créée par Nutanix et VSD Grafx**, et contient :
+
+| Génération | Archive | Modèles attestés dans la page |
+| --- | --- | --- |
+| G10 | `NTNX-stencil_G10_2026-03-17.zip` | `NX-1175S-G10`, `NX-3035-G10`, `NX-3060S-G10`, `NX-8150-G10`, `NX-8150G-G10`, `NX-8155AS-G10`, `NX-8170-G10`, **`NX-8170A-G10`** |
+| G9 | `NTNX-stencil_G9_2025-05-14.zip` | Collection de la génération G9 ; inventaire exact à relever |
+| G8 | `NTNX-stencil_G8_2022-03-10.zip` | Collection de la génération G8 ; inventaire exact à relever |
+| G6/G7 | `NTNX-stencil_2019-08-01.zip` | Collection G6/G7 ; inventaire exact à relever |
+
+Ces fichiers sont des pochoirs **Visio VSSX**, pas des images PNG prêtes à être importées. Il faut les inspecter puis extraire/exporter les **vues frontales et arrière** correctes, avec cadrage orthogonal et transparence si possible. Une même illustration ne doit pas être associée arbitrairement à toutes les générations : hauteur, baies et interfaces changent selon la référence.
+
+**Droits :** la page de VisioCafe affiche un copyright VSD Grafx. Ne pas republier les archives ou les images modifiées dans ce dépôt public sans autorisation ; gérer les sources et les images dans un espace de travail contrôlé.
+
+### Import des PNG une fois préparés
+
+Un utilitaire générique est publié : [`scripts/import_nutanix_elevation_images.py`](scripts/import_nutanix_elevation_images.py).
+
+Convention attendue dans un répertoire local :
+
+```text
+NX-8170A-G10.front.png
+NX-8170A-G10.rear.png
+NX-8150G-G10.front.png
+NX-8150G-G10.rear.png
+```
+
+Le script vérifie le constructeur **Nutanix**, l'identité exacte du modèle, les images déjà installées et le contenu PNG. Il lance une simulation par défaut et n'écrase **jamais** une image existante. Il importe via la requête multipart PATCH vers `/api/dcim/device-types/<id>/` uniquement avec `--apply`. Il nécessite les variables d'environnement `NETBOX_URL`, `NETBOX_TOKEN` et, idéalement, un certificat TLS correctement vérifiable.
+
+**Statut :** sources identifiées et importeur de PNG préparé ; **aucune image Nutanix n'a encore été extraite ni importée dans l'instance**. Le traitement des archives Visio et la validation des images par modèle restent à faire.
+
 ## Sources de référence
 
 - [Bibliothèque communautaire de modèles NetBox](https://github.com/netbox-community/devicetype-library)
