@@ -249,6 +249,28 @@ ethtool eth4 | grep -Ei 'Supported link modes|Speed:|Port:|Supported ports|Link 
 
 Les informations détaillées des ports Broadcom, cartes installées et prises externes devront être confirmées avec la documentation OEM ou la configuration matérielle. **Ne pas généraliser la configuration constatée à tous les exemplaires du même modèle si des options AIOM/OCP/PCIe sont possibles.**
 
+### Quatrième relevé : contrôleur Broadcom et connectique identifiés
+
+Le complément d'inventaire réalisé directement sur l'hôte AHV confirme **deux fonctions PCI Broadcom BCM57416 NetXtreme-E Dual-Media 10G RDMA Ethernet Controller** (`[14e4:16d8]`, révision 01). Le pilote `bnxt_en` les associe à `eth1` et `eth4`.
+
+```text
+eth1 : Broadcom BCM57416 — Port: Twisted Pair — Speed: 10000Mb/s
+eth4 : Broadcom BCM57416 — Port: Twisted Pair — Speed: Unknown!
+```
+
+`eth1` était actif à 10 Gb/s ; `eth4` n'avait pas de lien et sa vitesse **n'était pas négociée**. `Speed: Unknown!` n'implique pas à lui seul une panne ou une limitation à 1 Gb/s. Les sorties filtrées de `ethtool` ne montrent que la première ligne `Supported link modes` et omettent les lignes de continuation : ne pas en déduire l'absence du mode 10 Gb/s.
+
+**Synthèse de la configuration observée sur cet exemplaire :**
+
+| Interfaces | Contrôleur | Nombre | Modèle NetBox candidat |
+| --- | --- | ---: | --- |
+| `eth0`, `eth2`, `eth3`, `eth5` | Intel X710 10GBASE-T (`i40e`) | 4 | `10gbase-t` |
+| `eth1`, `eth4` | Broadcom BCM57416 Dual-Media 10G (`bnxt_en`), `Port: Twisted Pair` | 2 | `10gbase-t` |
+
+**Conclusion :** six interfaces Ethernet physiques de type cuivre 10 GbE peuvent être proposées pour **la configuration effectivement observée** du `NX-8170A-G10-A9355-CM`. Les interfaces logicielles, l'USB RNDIS du BMC et les contrôleurs VirtIO de la CVM sont exclus. La présence d'une carte optionnelle ou d'un port BMC RJ45 externe reste à confirmer par l'inventaire physique. **Aucun changement de Device Type NetBox n'est attesté par ce relevé.**
+
+Une future correction API doit être idempotente : uniquement ajouter les `interface-templates` absents (nom + modèle), signaler toute différence de type, simuler avant `--apply`, et ne modifier aucun autre modèle.
+
 ## 6. Procédure sûre de mise à jour NetBox
 
 1. Faire l'inventaire exact des modèles présents et des ports manquants (`dcim/device-types/` et `dcim/interface-templates/`).
@@ -270,7 +292,7 @@ Les informations détaillées des ports Broadcom, cartes installées et prises e
 | Simulation de 14 ports sur quatre modèles | Réussie ; création non démontrée |
 | Validation des interfaces pour tous les modèles | **À faire** |
 | Vérification des variantes NX-8150 | **À faire** |
-| Relevé des cartes réseau pour NX-8170A-G10-A9355-CM | **Hôte AHV 11.2 confirmé** : 4 Intel X710 (i40e) + 2 Broadcom (bnxt_en) ; type/connecteurs Broadcom à vérifier |
+| Relevé des cartes réseau pour NX-8170A-G10-A9355-CM | **Six interfaces confirmées** : 4 Intel X710 10GBASE-T + 2 Broadcom BCM57416 cuivre 10G ; import NetBox à faire |
 | Images avant/arrière Nutanix | **À faire** |
 
 ## Sources de référence
