@@ -50,9 +50,11 @@ if len(models) != 1:
     raise SystemExit(f"Modele Nutanix NX-8170A-G10: {len(models)} correspondances; abandon")
 dt_id = models[0]["id"]
 
-interfaces = get_all("dcim/interface-templates/", {"devicetype_id": dt_id})
+# NetBox 4.6.x API filter (not legacy 'devicetype_id').
+interfaces = get_all("dcim/interface-templates/", {"device_type_id": dt_id, "limit": 100})
 if any(
-    isinstance(i.get("device_type"), dict) and i["device_type"].get("id") != dt_id
+    not isinstance(i.get("device_type"), dict)
+    or i["device_type"].get("id") != dt_id
     for i in interfaces
 ):
     raise SystemExit("Filtre interface templates non applique, abandon")
