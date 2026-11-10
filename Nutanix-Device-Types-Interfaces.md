@@ -296,6 +296,20 @@ docker compose run --rm \
 
 **Sécurité :** ce paramètre désactive la validation d'identité du serveur et expose aux attaques d'interception ; il ne doit pas devenir la configuration permanente. Installer de préférence un certificat de confiance avec **SAN correspondant au DNS ou à l'adresse IP réellement utilisée** et transmettre sa chaîne CA à l'importeur. **Aucun résultat de la seconde simulation n'est encore confirmé dans ce document.**
 
+### Correctif de la pagination sur NetBox 4.6.9
+
+Après désactivation ponctuelle de la vérification du certificat autosigné, le script a pu contacter l'API mais s'est arrêté avec :
+
+```text
+RuntimeError: Pagination anormale, abandon
+```
+
+La cause est l'emploi du **filtre historique `devicetype_id`**. Dans [NetBox v4.6.9, `DeviceTypeComponentFilterSet`](https://github.com/netbox-community/netbox/blob/v4.6.9/netbox/dcim/filtersets.py), la clé supportée est **`device_type_id`**. L'ancien filtre, ignoré, entraînait un chargement des Interface Templates de toute l'instance, jusqu'à la limite de sécurité de 20 pages.
+
+La [version corrigée du script](scripts/fix_nutanix_8170a_interfaces.py) utilise le bon filtre et vérifie que tous les résultats appartiennent au Device Type ciblé. **Le lancement erroné s'est arrêté avant toute requête POST ; aucune écriture n'a été exécutée.**
+
+Le lancement corrigé reste en **simulation par défaut**. La vérification TLS doit être rétablie après remplacement du certificat par un certificat avec SAN approprié.
+
 ## 6. Procédure sûre de mise à jour NetBox
 
 1. Faire l'inventaire exact des modèles présents et des ports manquants (`dcim/device-types/` et `dcim/interface-templates/`).
