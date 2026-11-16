@@ -12,6 +12,8 @@ Documentation technique publique consacrée à l'inventaire matériel et à l'im
 
 - [Nutanix — images de baie automatisées](scripts/nutanix_auto/README.md) : téléchargement des pochoirs, conversion en PNG, galerie de contrôle et import NetBox après validation.
 
+- [Listes d'impact switch, PDU et Power Feed](Impact-Analysis-Switch-PDU.md) : traçage des connexions, méthode de reporting CSV et limites des analyses de panne.
+
 ## Confidentialité
 
 Le contenu est volontairement anonymisé : aucune adresse IP privée, aucun nom d'hôte personnel, aucun token API, mot de passe, empreinte de certificat ou détail de topologie interne n'est publié.
